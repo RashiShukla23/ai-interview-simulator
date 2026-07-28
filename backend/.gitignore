@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment variables (IMPORTANT - never push this, has your API keys/passwords)
+.env
+
+# Uploaded files (temporary resume uploads)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
