@@ -3,17 +3,17 @@ const cors = require('cors');
 require('dotenv').config();
 
 const pool = require('./config/db');
+const resumeRoutes = require('./routes/resume');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-//middleware
 app.use(cors());
 app.use(express.json());
 
-//Test route — confirms server is running
+// Test route — confirms server is running
 app.get('/', (req, res) => {
-  res.send('AI Interview Simulator backend is running ');
+  res.send('AI Interview Simulator backend is running 🚀');
 });
 
 // Test route — confirms DB connection works
@@ -26,6 +26,9 @@ app.get('/api/test-db', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Resume routes
+app.use('/api/resume', resumeRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
