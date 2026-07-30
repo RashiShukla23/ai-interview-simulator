@@ -50,6 +50,7 @@ ${rawText}
   return JSON.parse(cleaned);
 };
 
+
 // Generates personalized interview questions based on parsed resume data
 const generateQuestionsWithAI = async (parsed) => {
   const hasExperience = parsed.experience && parsed.experience.length > 0;
