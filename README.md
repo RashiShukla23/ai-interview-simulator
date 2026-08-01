@@ -31,7 +31,7 @@ An AI-powered interview simulator that:
 - Live coding problem shown alongside Monaco Editor
 - User writes code; AI observes progress (on pause/hint request) and gives Socratic hints — not answers
 - User explains approach before submitting (reasoning check)
-- Code executed via **Judge0 API** against real test cases
+- Code is evaluated by an **AI-based execution simulator**: a carefully engineered system prompt with few-shot examples guides the LLM to trace the code line-by-line against each test case (catching bugs like off-by-one errors, type mismatches, and missing conversions) rather than just pattern-matching correctness
 - AI asks a post-submission follow-up (time complexity, edge cases)
 
 ### Round 3 — CS Fundamentals Round
@@ -47,7 +47,7 @@ An AI-powered interview simulator that:
 
 - **Resume-aware personalization** — questions generated from the candidate's actual projects, not templates
 - **Process-based scoring** — evaluates *how* a candidate thinks, not just final pass/fail
-- **Hybrid AI + real execution** — uses Judge0 for objective code correctness (AI alone cannot reliably judge code correctness) and LLM for subjective reasoning/communication evaluation
+- **Few-shot engineered code evaluation** — instead of a generic "is this correct?" prompt, the system uses a detailed system prompt with worked few-shot examples (common bug patterns like string-vs-int, off-by-one loops, missing return statements) to force the LLM into a disciplined, line-by-line execution trace — significantly more reliable than naive LLM judging
 - **Resume-consistency verification** — flags gaps between resume claims and live explanations
 
 ---
@@ -58,8 +58,8 @@ An AI-powered interview simulator that:
 |---|---|
 | Frontend | React + Monaco Editor |
 | Backend | Node.js + Express |
-| AI / LLM | OpenAI API (via LangChain) |
-| Code Execution | Judge0 API |
+| AI / LLM | OpenAI API (gpt-4o-mini) with engineered few-shot prompting |
+| Code Evaluation | AI-based execution simulation (few-shot prompted line-by-line tracing) |
 | Database | PostgreSQL |
 | Resume Parsing | pdf-parse (text extraction) + OpenAI API (structuring) |
 
@@ -75,7 +75,7 @@ An AI-powered interview simulator that:
 | OpenAI API | Reasoning/approach evaluation | Before code submission (user explains approach) |
 | OpenAI API | Post-submission follow-up question + scoring | After Judge0 returns results |
 | OpenAI API | CS Fundamentals answer scoring | During Round 3 |
-| Judge0 API | Actual code execution & test case validation | When user clicks "Run" / "Submit" in the coding round |
+| OpenAI API | Code evaluation (few-shot prompted execution trace + test case validation) | When user clicks "Submit" in the coding round |
 
 ---
 
@@ -84,14 +84,17 @@ An AI-powered interview simulator that:
 ```
 User → React Frontend (Monaco Editor) → Node/Express Backend
                                               │
-                        ┌─────────────────────┼─────────────────────┐
-                        ▼                     ▼                     ▼
-                  OpenAI API            Judge0 API            PostgreSQL DB
-              (questions, hints,      (code execution,      (profiles, questions,
-               reasoning, scoring)     pass/fail, runtime)   sessions, responses,
-                                                              feedback reports)
-                        │                     │                     │
-                        └─────────────────────┴─────────────────────┘
+                                              ▼
+                                        OpenAI API
+                              (questions, hints, reasoning,
+                            code execution tracing via few-shot
+                                  prompting, scoring)
+                                              │
+                                              ▼
+                                       PostgreSQL DB
+                              (profiles, questions, sessions,
+                                responses, feedback reports)
+                                              │
                                               ▼
                                    Unified Feedback Report
                                      (shown to user)
@@ -135,10 +138,12 @@ User codes → (on pause/hint request)
 User writes approach explanation → stored in DB
 
 User clicks Submit
-  → Backend sends code to Judge0 API
-  → Judge0 runs it in sandbox, returns pass/fail + runtime per test case
-  → Backend sends code + results to OpenAI API for follow-up question
-  → User answers → OpenAI scores → stored in DB
+  → Backend sends code + test cases to OpenAI API
+  → A detailed system prompt with few-shot examples guides the model to trace
+    the code line-by-line for each test case (catching bugs like type mismatches,
+    off-by-one errors, missing conversions) and return pass/fail per test case
+  → Same call also evaluates reasoning and generates a follow-up question
+  → Results + scores stored in DB
 ```
 
 **Step 3c — CS Fundamentals Round**
@@ -174,7 +179,7 @@ Backend aggregates all round scores from DB
 - **LLM APIs (OpenAI)** — core of the entire personalization and evaluation layer
 - **LangChain** — orchestration framework for structured prompting and chaining LLM calls
 - **Agentic AI Systems** — the interviewer, hint-giver, and evaluator function as reasoning agents rather than static scripts
-- **Prompt Engineering** — structured, role-specific prompting for consistent evaluation quality
+- **Prompt Engineering (Few-Shot)** — the code evaluator uses a detailed system prompt with worked few-shot examples of common bug patterns to force disciplined, line-by-line execution tracing instead of naive correctness judging — this is the core technical differentiator of the coding round
 
 ---
 
@@ -208,7 +213,7 @@ Backend aggregates all round scores from DB
 
 **Out of scope (future scope, not this project):**
 - Real-time multi-user collaboration (Yjs/CRDTs)
-- Voice-based interview (Phase 2 candidate — Web Speech API, HR round only) FUTURE SCOPE FOR NOW
+- Voice-based interview (Phase 2 candidate — Web Speech API, HR round only)
 - Smart glasses / hardware integration (not applicable to this project)
 
 ---
@@ -217,6 +222,6 @@ Backend aggregates all round scores from DB
 
 Existing research splits into two clusters:
 1. Resume-personalized conversational mock-interview systems focused on emotion, confidence, and behavioral scoring (no coding component)
-2. Code-assessment research confirming LLMs alone cannot reliably verify code correctness without real execution
+2. Code-assessment research showing that naive LLM-based code judging is unreliable without a disciplined evaluation strategy
 
-**No reviewed system combines** resume-aware personalized questioning **with** a live coding round, real code execution (Judge0), Socratic hint-giving, and process-based reasoning scoring in one unified platform. This is the gap this project addresses.
+**No reviewed system combines** resume-aware personalized questioning **with** a live coding round, few-shot engineered code evaluation, Socratic hint-giving, and process-based reasoning scoring in one unified platform. This is the gap this project addresses.
