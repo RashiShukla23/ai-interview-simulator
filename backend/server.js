@@ -7,6 +7,7 @@ const resumeRoutes = require('./routes/resume');
 const interviewRoutes = require('./routes/interview');
 const codingRoutes = require('./routes/coding');
 const csFundamentalsRoutes = require('./routes/csFundamentals');
+const candidateRoutes = require('./routes/candidate');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +36,7 @@ app.use('/api/resume', resumeRoutes);
 app.use('/api/interview', interviewRoutes);
 app.use('/api/coding', codingRoutes);
 app.use('/api/cs-fundamentals', csFundamentalsRoutes);
+app.use('/api/candidate', candidateRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
