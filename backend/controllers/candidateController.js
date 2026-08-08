@@ -107,4 +107,23 @@ Return ONLY the summary text, no JSON, no markdown.
   }
 };
 
-module.exports = { getRoundsCompleted, getCombinedReport };
+// GET /api/candidate/:id/questions?round_type=resume
+const getQuestionsByRound = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { round_type } = req.query;
+    if (!round_type) {
+      return res.status(400).json({ success: false, error: 'round_type query param is required' });
+    }
+    const result = await pool.query(
+      `SELECT * FROM questions WHERE candidate_id = $1 AND round_type = $2 ORDER BY id`,
+      [id, round_type]
+    );
+    res.json({ success: true, questions: result.rows });
+  } catch (err) {
+    console.error('Error fetching questions by round:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+module.exports = { getRoundsCompleted, getCombinedReport, getQuestionsByRound };
