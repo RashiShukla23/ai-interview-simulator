@@ -108,6 +108,7 @@ Return ONLY the summary text, no JSON, no markdown.
 };
 
 // GET /api/candidate/:id/questions?round_type=resume
+// GET /api/candidate/:id/questions?round_type=resume
 const getQuestionsByRound = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,10 +116,21 @@ const getQuestionsByRound = async (req, res) => {
     if (!round_type) {
       return res.status(400).json({ success: false, error: 'round_type query param is required' });
     }
-    const result = await pool.query(
-      `SELECT * FROM questions WHERE candidate_id = $1 AND round_type = $2 ORDER BY id`,
-      [id, round_type]
-    );
+
+    let result;
+    if (round_type === 'technical') {
+      // Coding problems are shared across all candidates, not personalized
+      result = await pool.query(
+        `SELECT * FROM questions WHERE round_type = 'technical' ORDER BY RANDOM() LIMIT 1`
+      );
+    } else {
+      // Resume and CS fundamentals questions are candidate-specific
+      result = await pool.query(
+        `SELECT * FROM questions WHERE candidate_id = $1 AND round_type = $2 ORDER BY id`,
+        [id, round_type]
+      );
+    }
+
     res.json({ success: true, questions: result.rows });
   } catch (err) {
     console.error('Error fetching questions by round:', err);
