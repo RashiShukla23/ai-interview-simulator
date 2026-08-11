@@ -12,6 +12,7 @@ export default function CodingRound() {
   const [showHint, setShowHint] = useState(false);
   const [results, setResults] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [finishing, setFinishing] = useState(false);
   const navigate = useNavigate();
   const candidateId = localStorage.getItem('candidate_id');
 
@@ -54,6 +55,19 @@ export default function CodingRound() {
     }
   };
 
+  const finishRound = async () => {
+    setFinishing(true);
+    try {
+      await axios.post('http://localhost:5000/api/interview/report', {
+        session_id: results.session_id,
+      });
+    } catch (err) {
+      console.error('Error generating report:', err);
+    } finally {
+      navigate('/rounds');
+    }
+  };
+
   if (!question) {
     return <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center text-[var(--color-muted)]">Loading problem...</div>;
   }
@@ -76,9 +90,9 @@ export default function CodingRound() {
 
           <button
             onClick={getHint}
-            className="mt-6 text-sm text-[var(--color-accent)] flex items-center gap-2 hover:underline"
+            className="mt-6 text-sm text-[var(--color-accent)] hover:underline"
           >
-            💡 Get a hint
+            Get a hint
           </button>
           {showHint && (
             <div className="mt-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md p-4 text-sm text-[var(--color-muted)] italic">
@@ -138,7 +152,7 @@ export default function CodingRound() {
                         r.passed ? 'bg-[var(--color-accent-dim)] text-[var(--color-accent)]' : 'bg-red-950 text-[var(--color-danger)]'
                       }`}
                     >
-                      {r.passed ? '✓' : '✗'} Test {i + 1}
+                      {r.passed ? 'Pass' : 'Fail'} — Test {i + 1}
                     </span>
                   ))}
                 </div>
@@ -148,10 +162,11 @@ export default function CodingRound() {
                   </p>
                 )}
                 <button
-                  onClick={() => navigate('/rounds')}
-                  className="mt-4 text-sm text-[var(--color-accent)] hover:underline"
+                  onClick={finishRound}
+                  disabled={finishing}
+                  className="mt-4 w-full bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold py-2.5 rounded-md disabled:opacity-50"
                 >
-                  Back to Rounds →
+                  {finishing ? 'Saving report...' : 'Finish & Save Report'}
                 </button>
               </div>
             )}

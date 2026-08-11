@@ -10,6 +10,7 @@ export default function CSFundamentalsRound() {
   const [sessionId, setSessionId] = useState(null);
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [finishing, setFinishing] = useState(false);
   const chatEndRef = useRef(null);
   const navigate = useNavigate();
   const candidateId = localStorage.getItem('candidate_id');
@@ -51,6 +52,7 @@ export default function CSFundamentalsRound() {
         setCurrentIndex(next);
         setMessages((prev) => [...prev, { role: 'ai', text: questions[next].question_text }]);
       } else {
+        setCurrentIndex(questions.length);
         setMessages((prev) => [...prev, { role: 'ai', text: "That wraps up CS fundamentals — nice work." }]);
       }
     } catch (err) {
@@ -60,7 +62,20 @@ export default function CSFundamentalsRound() {
     }
   };
 
-  const isDone = currentIndex + 1 >= questions.length && messages.length > questions.length;
+  const finishRound = async () => {
+    setFinishing(true);
+    try {
+      await axios.post('http://localhost:5000/api/interview/report', {
+        session_id: sessionId,
+      });
+    } catch (err) {
+      console.error('Error generating report:', err);
+    } finally {
+      navigate('/rounds');
+    }
+  };
+
+  const isDone = currentIndex >= questions.length && questions.length > 0;
 
   if (loading) {
     return <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center text-[var(--color-muted)]">Generating your questions...</div>;
@@ -100,10 +115,11 @@ export default function CSFundamentalsRound() {
         <div className="max-w-2xl mx-auto flex gap-3">
           {isDone ? (
             <button
-              onClick={() => navigate('/rounds')}
-              className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold py-3 rounded-md"
+              onClick={finishRound}
+              disabled={finishing}
+              className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold py-3 rounded-md disabled:opacity-50"
             >
-              Back to Rounds →
+              {finishing ? 'Saving report...' : 'Finish & Save Report'}
             </button>
           ) : (
             <>

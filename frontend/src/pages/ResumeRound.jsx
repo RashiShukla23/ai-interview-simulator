@@ -10,6 +10,7 @@ export default function ResumeRound() {
   const [sessionId, setSessionId] = useState(null);
   const [sending, setSending] = useState(false);
   const [followUpAsked, setFollowUpAsked] = useState(false);
+  const [finishing, setFinishing] = useState(false);
   const chatEndRef = useRef(null);
   const navigate = useNavigate();
   const candidateId = localStorage.getItem('candidate_id');
@@ -47,7 +48,6 @@ export default function ResumeRound() {
       });
       if (!sessionId) setSessionId(res.data.session_id);
 
-      // Only allow ONE follow-up per question, then force move to the next real question
       if (res.data.follow_up_question && !followUpAsked) {
         setFollowUpAsked(true);
         setMessages((prev) => [...prev, { role: 'ai', text: res.data.follow_up_question }]);
@@ -57,13 +57,26 @@ export default function ResumeRound() {
         setFollowUpAsked(false);
         setMessages((prev) => [...prev, { role: 'ai', text: questions[next].question_text }]);
       } else {
-        setCurrentIndex(questions.length); // mark as fully done for progress display
+        setCurrentIndex(questions.length);
         setMessages((prev) => [...prev, { role: 'ai', text: "That's all the questions I have — nice work. Ready to see your report?" }]);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setSending(false);
+    }
+  };
+
+  const finishRound = async () => {
+    setFinishing(true);
+    try {
+      await axios.post('http://localhost:5000/api/interview/report', {
+        session_id: sessionId,
+      });
+    } catch (err) {
+      console.error('Error generating report:', err);
+    } finally {
+      navigate('/rounds');
     }
   };
 
@@ -98,10 +111,11 @@ export default function ResumeRound() {
         <div className="max-w-2xl mx-auto flex gap-3">
           {isDone ? (
             <button
-              onClick={() => navigate('/rounds')}
-              className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold py-3 rounded-md"
+              onClick={finishRound}
+              disabled={finishing}
+              className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold py-3 rounded-md disabled:opacity-50"
             >
-              Back to Rounds
+              {finishing ? 'Saving report...' : 'Finish & Save Report'}
             </button>
           ) : (
             <>
