@@ -5,10 +5,11 @@ import axios from 'axios';
 export default function ResumeRound() {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [messages, setMessages] = useState([]); // { role: 'ai' | 'user', text }
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sessionId, setSessionId] = useState(null);
   const [sending, setSending] = useState(false);
+  const [followUpAsked, setFollowUpAsked] = useState(false);
   const chatEndRef = useRef(null);
   const navigate = useNavigate();
   const candidateId = localStorage.getItem('candidate_id');
@@ -46,13 +47,17 @@ export default function ResumeRound() {
       });
       if (!sessionId) setSessionId(res.data.session_id);
 
-      if (res.data.follow_up_question) {
+      // Only allow ONE follow-up per question, then force move to the next real question
+      if (res.data.follow_up_question && !followUpAsked) {
+        setFollowUpAsked(true);
         setMessages((prev) => [...prev, { role: 'ai', text: res.data.follow_up_question }]);
       } else if (currentIndex + 1 < questions.length) {
         const next = currentIndex + 1;
         setCurrentIndex(next);
+        setFollowUpAsked(false);
         setMessages((prev) => [...prev, { role: 'ai', text: questions[next].question_text }]);
       } else {
+        setCurrentIndex(questions.length); // mark as fully done for progress display
         setMessages((prev) => [...prev, { role: 'ai', text: "That's all the questions I have — nice work. Ready to see your report?" }]);
       }
     } catch (err) {
@@ -62,7 +67,7 @@ export default function ResumeRound() {
     }
   };
 
-  const isLastDone = currentIndex + 1 >= questions.length && messages[messages.length - 1]?.role === 'ai' && messages.length > questions.length;
+  const isDone = currentIndex >= questions.length && questions.length > 0;
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
@@ -91,12 +96,12 @@ export default function ResumeRound() {
 
       <div className="border-t border-[var(--color-border)] px-6 py-4">
         <div className="max-w-2xl mx-auto flex gap-3">
-          {isLastDone ? (
+          {isDone ? (
             <button
               onClick={() => navigate('/rounds')}
               className="w-full bg-[var(--color-accent)] text-[var(--color-bg)] font-semibold py-3 rounded-md"
             >
-              Back to Rounds →
+              Back to Rounds
             </button>
           ) : (
             <>
