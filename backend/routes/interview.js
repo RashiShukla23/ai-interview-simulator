@@ -8,4 +8,6 @@ router.post('/answer', submitAnswer);
 // POST /api/interview/report — generate final aggregated report for a session
 router.post('/report', generateReport);
 
+router.get('/report/:session_id', getExistingReport);
+
 module.exports = router;
