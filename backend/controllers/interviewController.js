@@ -186,4 +186,37 @@ Return ONLY the summary text, no JSON, no markdown.
   }
 };
 
-module.exports = { submitAnswer, generateReport };
+// GET /api/interview/report/:session_id — fetch an already-generated report
+const getExistingReport = async (req, res) => {
+  try {
+    const { session_id } = req.params;
+    const reportResult = await pool.query(
+      `SELECT * FROM feedback_report WHERE session_id = $1`,
+      [session_id]
+    );
+    if (reportResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'No report found for this session' });
+    }
+
+    const responses = await pool.query(
+      `SELECT r.*, q.question_text FROM responses r
+       JOIN questions q ON r.question_id = q.id
+       WHERE r.session_id = $1`,
+      [session_id]
+    );
+
+    res.json({
+      success: true,
+      report: reportResult.rows[0],
+      per_question_breakdown: responses.rows.map((r) => ({
+        question: r.question_text,
+        answer: r.answer_text,
+        score: r.ai_score,
+      })),
+    });
+  } catch (err) {
+    console.error('Error fetching report:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+module.exports = { submitAnswer, generateReport, getExistingReport };
