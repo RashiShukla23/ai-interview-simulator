@@ -19,6 +19,7 @@ const LANGUAGE_MAP = {
 const runCode = async (code, language, stdin = '') => {
   const langConfig = LANGUAGE_MAP[language];
   if (!langConfig) {
+    
     throw new Error(`Unsupported language: ${language}`);
   }
 
