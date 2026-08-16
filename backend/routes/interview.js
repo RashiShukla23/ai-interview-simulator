@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { submitAnswer, generateReport } = require('../controllers/interviewController');
-
+const { submitAnswer, generateReport, getExistingReport } = require('../controllers/interviewController');
 // POST /api/interview/answer — submit an answer to a question (silent scoring)
 router.post('/answer', submitAnswer);
 
