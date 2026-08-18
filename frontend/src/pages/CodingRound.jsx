@@ -50,9 +50,11 @@ export default function CodingRound() {
         language,
         approach_explanation: approach,
       });
+      console.log('Got response:', res.data); //  THIS IS FOR TESTTINGGGG
+
       setResults(res.data);
     } catch (err) {
-      console.error(err);
+      console.error('AXIOS ERROR:', err);
     } finally {
       setSubmitting(false);
     }
