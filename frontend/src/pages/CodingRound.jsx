@@ -35,9 +35,12 @@ export default function CodingRound() {
 
   const handleSubmit = async () => {
     if (!approach.trim()) {
+      console.log('Submit clicked'); // TEMPORARY - for debugging
       alert('Please explain your approach before submitting.');
       return;
     }
+    console.log('Passed validation, sending request...'); // TEMPORARY
+
     setSubmitting(true);
     try {
       const res = await axios.post('http://localhost:5000/api/coding/submit', {
