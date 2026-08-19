@@ -131,7 +131,7 @@ export default function CodingRound() {
             />
           </div>
 
-          <div className="border-t border-[var(--color-border)] p-4">
+          <div className="border-t border-[var(--color-border)] p-4 overflow-y-auto max-h-[50vh]">
             <textarea
               value={approach}
               onChange={(e) => setApproach(e.target.value)}
