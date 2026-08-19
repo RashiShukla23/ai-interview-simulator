@@ -6,6 +6,7 @@ import ResumeRound from './pages/ResumeRound';
 import CodingRound from './pages/CodingRound';
 import CSFundamentalsRound from './pages/CSFundamentalsRound';
 import FinalReport from './pages/FinalReport';
+import RoundReport from './pages/RoundReport';
 
 export default function App() {
   return (
@@ -17,7 +18,9 @@ export default function App() {
         <Route path="/round/resume" element={<ResumeRound />} />
         <Route path="/round/coding" element={<CodingRound />} />
         <Route path="/round/cs-fundamentals" element={<CSFundamentalsRound />} />
-        <Route path="/report/combined" element={<FinalReport />} />
+        <Route path="/report/combined" element={<FinalReport />}
+         />
+        <Route path="/report/round/:sessionId" element={<RoundReport />} />
       </Routes>
     </BrowserRouter>
   );
