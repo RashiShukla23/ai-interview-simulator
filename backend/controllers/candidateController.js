@@ -77,12 +77,14 @@ ${JSON.stringify(roundReports.map((r) => ({
   summary: r.summary_text,
 })), null, 2)}
 
-Write a concise, encouraging but honest overall summary (5-7 sentences) that:
-- Synthesizes performance across all completed rounds (don't just repeat each round's summary separately)
-- Highlights the candidate's strongest round and area needing the most improvement
-- Gives one clear, actionable piece of advice for their next interview prep session
+Write the summary as bullet points, not a paragraph. Return ONLY valid JSON (no markdown, no explanation) in exactly this format:
+{
+  "strengths": ["short bullet point", "short bullet point"],
+  "areas_to_improve": ["short bullet point", "short bullet point"],
+  "next_step": "one specific, actionable piece of advice for their next prep session"
+}
 
-Return ONLY the summary text, no JSON, no markdown.
+Keep each bullet under 20 words. Base strengths and areas_to_improve on the actual round scores and summaries above — be specific, not generic.
 `;
 
     const completion = await openai.chat.completions.create({
@@ -91,7 +93,9 @@ Return ONLY the summary text, no JSON, no markdown.
       temperature: 0.4,
     });
 
-    const combinedSummary = completion.choices[0].message.content.trim();
+    const raw = completion.choices[0].message.content.trim();
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+    const combinedSummary = JSON.parse(cleaned);
 
     res.json({
       success: true,
