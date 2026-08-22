@@ -55,9 +55,33 @@ export default function FinalReport() {
 
         {/* AI Summary */}
         <div className="mt-10 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-6">
-          <h3 className="font-semibold text-[var(--color-text)] mb-3">What we noticed</h3>
-          <p className="text-sm text-[var(--color-muted)] leading-relaxed">{report.combined_summary}</p>
-        </div>
+  <h3 className="font-semibold text-[var(--color-text)] mb-4">What we noticed</h3>
+
+  <p className="text-xs font-medium text-[var(--color-accent)] mb-2">Strengths</p>
+  <ul className="space-y-1.5 mb-5">
+    {report.combined_summary.strengths.map((s, i) => (
+      <li key={i} className="text-sm text-[var(--color-muted)] flex gap-2">
+        <span className="text-[var(--color-accent)]">-</span>
+        <span>{s}</span>
+      </li>
+    ))}
+  </ul>
+
+  <p className="text-xs font-medium text-[var(--color-accent)] mb-2">Areas to improve</p>
+  <ul className="space-y-1.5 mb-5">
+    {report.combined_summary.areas_to_improve.map((a, i) => (
+      <li key={i} className="text-sm text-[var(--color-muted)] flex gap-2">
+        <span className="text-[var(--color-accent)]">-</span>
+        <span>{a}</span>
+      </li>
+    ))}
+  </ul>
+
+  <div className="border-l-2 border-[var(--color-accent)] pl-4">
+    <p className="text-xs font-medium text-[var(--color-accent)] mb-1">Next step</p>
+    <p className="text-sm text-[var(--color-text)]">{report.combined_summary.next_step}</p>
+  </div>
+</div>
 
         {/* Per-question breakdown */}
         <div className="mt-8">
