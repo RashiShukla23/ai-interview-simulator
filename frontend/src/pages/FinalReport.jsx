@@ -65,6 +65,10 @@ export default function FinalReport() {
         <span>{s}</span>
       </li>
     ))}
+
+
+
+    
   </ul>
 
   <p className="text-xs font-medium text-[var(--color-accent)] mb-2">Areas to improve</p>
